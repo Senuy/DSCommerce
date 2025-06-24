@@ -2,6 +2,7 @@ package com.devyunes.dscommerce.entities;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -86,6 +87,15 @@ public class Order {
 
 	public void setPayment(Payment payment) {
 		this.payment = payment;
+	}
+	
+
+	public Set<OrderItem> getItens() {
+		return itens;
+	}
+	
+	public List<Product> getProduct(){
+		return itens.stream().map(x -> x.getProduct()).toList();
 	}
 
 	@Override
