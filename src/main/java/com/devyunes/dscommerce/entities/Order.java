@@ -17,27 +17,28 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+
 @Entity
 @Table(name = "tb_order")
 public class Order {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
 	private Instant moment;
 	private OrderStatus status;
-	
+
 	@ManyToOne
-	@JoinColumn(name ="client_id")
+	@JoinColumn(name = "client_id")
 	private User client;
-	
-	@OneToOne(mappedBy = "order",cascade = CascadeType.ALL)
+
+	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
 	private Payment payment; // feito get e set
-	
-	@OneToMany(mappedBy ="id.order")
+
+	@OneToMany(mappedBy = "id.order")
 	private Set<OrderItem> itens = new HashSet<>();
-	
+
 	public Order() {
 	}
 
@@ -79,7 +80,6 @@ public class Order {
 	public void setClient(User client) {
 		this.client = client;
 	}
-	
 
 	public Payment getPayment() {
 		return payment;
@@ -88,13 +88,12 @@ public class Order {
 	public void setPayment(Payment payment) {
 		this.payment = payment;
 	}
-	
 
 	public Set<OrderItem> getItens() {
 		return itens;
 	}
-	
-	public List<Product> getProduct(){
+
+	public List<Product> getProduct() {
 		return itens.stream().map(x -> x.getProduct()).toList();
 	}
 
@@ -114,14 +113,5 @@ public class Order {
 		Order other = (Order) obj;
 		return Objects.equals(id, other.id);
 	}
-	
-	
-
-	
-	
-	
-	
-	
-	
 
 }
