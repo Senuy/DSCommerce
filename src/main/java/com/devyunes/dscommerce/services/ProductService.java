@@ -1,15 +1,20 @@
 package com.devyunes.dscommerce.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.devyunes.dscommerce.dto.ProductDTO;
 import com.devyunes.dscommerce.entities.Product;
 import com.devyunes.dscommerce.repositories.ProductRepository;
+import com.devyunes.dscommerce.services.exceptions.DatabaseException;
 import com.devyunes.dscommerce.services.exceptions.ResourceNotFoundException;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ProductService {
@@ -44,20 +49,33 @@ public class ProductService {
 
 	@Transactional
 	public ProductDTO update(Long id, ProductDTO dto) {
-		Product entity = repository.getReferenceById(id);
-		copyDtoToEntity(dto, entity);
-		/*
-		 * entity.setName(dto.getName()); entity.setDescription(dto.getDescription());
-		 * entity.setPrice(dto.getPrice()); entity.setImgUrl(dto.getImgUrl());
-		 */
-		entity = repository.save(entity);
-		return new ProductDTO(entity);
+		
+		try {
+			Product entity = repository.getReferenceById(id);
+			copyDtoToEntity(dto, entity);
+			/*
+			 * entity.setName(dto.getName()); entity.setDescription(dto.getDescription());
+			 * entity.setPrice(dto.getPrice()); entity.setImgUrl(dto.getImgUrl());
+			 */
+			entity = repository.save(entity);
+			return new ProductDTO(entity);
+			
+		} catch (EntityNotFoundException e) {
+			throw new ResourceNotFoundException("Recurso não encontrado");
+		}
 
 	}
 	
-	@Transactional
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public void delete(Long id) {
-		repository.deleteById(id);
+		if(!repository.existsById(id)) {
+			throw new ResourceNotFoundException("Recurso não encontrado");
+		}
+		try {
+			repository.deleteById(id);			
+		} catch (DataIntegrityViolationException e) {
+			throw new DatabaseException("Falha de Integridade Referencial");
+		}
 	}
 
 	private void copyDtoToEntity(ProductDTO dto, Product entity) {
